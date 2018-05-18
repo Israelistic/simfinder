@@ -1,6 +1,6 @@
 extern crate image;
 
-use image::{DynamicImage, GenericImage, Pixel};
+use self::image::{DynamicImage, GenericImage, Pixel};
 use std::cmp::{max, min};
 
 // Todo: fix comparing images of different sizes
@@ -24,4 +24,11 @@ pub fn compare(img0: DynamicImage, img1: DynamicImage) -> f64 {
 
 	return accumulated_diff.sqrt();
 
+}
+
+// TODO: handle errors properly
+pub fn compare_files(filename0: &str, filename1: &str) -> f64{
+    let img0 = image::open(filename0).unwrap();
+    let img1 = image::open(filename1).unwrap();
+    return compare(img0, img1);
 }
