@@ -1,0 +1,6 @@
+[package]
+name = "simfinder"
+version = "0.1.0"
+authors = ["Frank Vumbaca <fvumbaca@outlook.com>"]
+
+[dependencies]
