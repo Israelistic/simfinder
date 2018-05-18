@@ -19,6 +19,15 @@ impl CompJob {
 	pub fn new(filename0: &str, filename1: &str) -> CompJob {
 		return CompJob{filename0: String::from(filename0), filename1: String::from(filename1)};
 	}
+
+	pub fn get_filename0(&self) -> &str {
+		self.filename0.trim()
+	}
+
+	pub fn get_filename1(&self) -> &str {
+		self.filename1.trim()
+	}
+
 }
 
 impl fmt::Display for CompJob {
