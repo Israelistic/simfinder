@@ -6,6 +6,7 @@ use std::error::Error;
 use std::boxed::Box;
 use self::image::{DynamicImage, GenericImage, Pixel};
 use std::fmt;
+use std::time::{SystemTime};
 
 // Information to start a comparison job
 pub struct CompJob {
@@ -13,20 +14,26 @@ pub struct CompJob {
 	filename1: String,
 }
 
-// Constructor for job structure
+// Constructor and getters for job structure
 impl CompJob {
-	pub fn new(filename0: String, filename1: String) -> CompJob {
-		return CompJob{filename0, filename1};
-	}
 	pub fn new(filename0: &str, filename1: &str) -> CompJob {
 		return CompJob{filename0: String::from(filename0), filename1: String::from(filename1)};
 	}
 }
 
-// Wrapper to execute a comparison via a job
-pub fn execute_job(job: CompJob) -> Result<f64, Box<Error>> {
-	return compare_files(job.filename0.trim(), job.filename1.trim());
+impl fmt::Display for CompJob {
+	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f,"Job for {} and {}", self.filename0.trim(), self.filename1.trim())
+    }
 }
+
+// Wrapper to execute a comparison via a job
+pub fn execute_job(job: &CompJob) -> Result<(f64, u32), Box<Error>> {
+	let now = SystemTime::now();
+	let result = compare_files(job.filename0.trim(), job.filename1.trim())?;
+	Ok((result, util::nanos_to_millis(now.elapsed()?.subsec_nanos())))
+}
+
 
 // Defining a custom comparison error type
 #[derive(Debug)]
@@ -76,6 +83,15 @@ pub fn compare_files(filename0: &str, filename1: &str) -> Result<f64, Box<Error>
     return Ok(compare(img0, img1)?);
 }
 
+mod util {
+	pub fn nanos_to_millis(nanos: u32) -> u32 {
+		// This converts nanos to milliseconds.
+		// For some reason, rust Durations only supports
+		// seconds and nano seconds.
+		nanos / 1_000_000
+	}
+}
+
 // Unit tests
 #[cfg(test)]
 mod tests {
@@ -93,8 +109,16 @@ mod tests {
 	fn execute_job_test() {
 		let job0 = super::CompJob::new("examples/blank0.png", "examples/blank1.png");
 		let job1 = super::CompJob::new("examples/blank0.png", "examples/tri0.png");
-		assert!(execute_job(job0).unwrap() == 0.0, "Images are the same.");
-		assert!(execute_job(job1).unwrap() > 0.0, "Images are not the same.");
+		let (result0, _) = super::execute_job(&job0).unwrap();
+		let (result1, _) = super::execute_job(&job1).unwrap();
+		assert!(result0 == 0.0, "Images are the same.");
+		assert!(result1 > 0.0, "Images are not the same.");
+	}
+
+	#[test]
+	fn nano_to_millis_test() {
+		assert_eq!(super::util::nanos_to_millis(1_000_000), 1, 
+			"One million nanoseconds is one millisecond.");
 	}
 
 }
