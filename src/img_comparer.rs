@@ -32,3 +32,17 @@ pub fn compare_files(filename0: &str, filename1: &str) -> f64{
     let img1 = image::open(filename1).unwrap();
     return compare(img0, img1);
 }
+
+#[cfg(test)]
+mod tests {
+	use super::compare_files;
+
+	#[test]
+	fn compare_files_test() {
+		assert!(compare_files("example-imgs/blank0.png", 
+			"example-imgs/tri0.png") > 0.0, "Images are not the same.");
+		assert!(compare_files("example-imgs/tri0.png", 
+			"example-imgs/tri1.png") == 0.0, "Images are the same.");
+	}
+
+}
