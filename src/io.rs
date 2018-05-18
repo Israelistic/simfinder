@@ -2,7 +2,6 @@ extern crate csv;
 
 use std::path::Path;
 use std::fs::File;
-use std::io::BufWriter;
 use std::error::Error;
 use std::boxed::Box;
 use std::io::Write;
@@ -30,7 +29,7 @@ pub fn load(filename: &str) -> Result<Vec<CompJob>, &str> {
 }
 
 pub fn write_headers(mut f: &File) -> Result<(), Box<Error>> {
-	writeln!(&mut f, "image1, image2, similarity, elapsed,")?;
+	writeln!(&mut f, "image1, image2, similar, elapsed,")?;
 	Ok(())
 }
 
