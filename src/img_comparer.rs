@@ -1,10 +1,54 @@
 extern crate image;
 
-use self::image::{DynamicImage, GenericImage, Pixel};
 use std::cmp::{max, min};
+use std::string::String;
+use std::error::Error;
+use std::boxed::Box;
+use self::image::{DynamicImage, GenericImage, Pixel};
+use std::fmt;
+
+// Information to start a comparison job
+pub struct CompJob {
+	filename0: String,
+	filename1: String,
+}
+
+// Constructor for job structure
+impl CompJob {
+	pub fn new(filename0: String, filename1: String) -> CompJob {
+		return CompJob{filename0, filename1};
+	}
+	pub fn new(filename0: &str, filename1: &str) -> CompJob {
+		return CompJob{filename0: String::from(filename0), filename1: String::from(filename1)};
+	}
+}
+
+// Wrapper to execute a comparison via a job
+pub fn execute_job(job: CompJob) -> Result<f64, Box<Error>> {
+	return compare_files(job.filename0.trim(), job.filename1.trim());
+}
+
+// Defining a custom comparison error type
+#[derive(Debug)]
+pub struct CompError {
+}
+
+// Implementing printing to screen behavior for error
+impl fmt::Display for CompError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f,"{}",self.description())
+    }
+}
+
+// Implementing generic error behavior
+impl Error for CompError {
+	fn description(&self) -> &str {
+        "An error occurred when comparing image files"
+    }
+}
 
 // Todo: fix comparing images of different sizes
-pub fn compare(img0: DynamicImage, img1: DynamicImage) -> f64 {
+pub fn compare(img0: DynamicImage, img1: DynamicImage) -> Result<f64, CompError> {
 	let (img0_width, img0_height) = img0.dimensions();
 	let (img1_width, img1_height) = img1.dimensions();
 
@@ -22,27 +66,35 @@ pub fn compare(img0: DynamicImage, img1: DynamicImage) -> f64 {
 		}
 	}
 
-	return accumulated_diff.sqrt();
-
+	return Ok(accumulated_diff.sqrt());
 }
 
 // TODO: handle errors properly
-pub fn compare_files(filename0: &str, filename1: &str) -> f64{
-    let img0 = image::open(filename0).unwrap();
-    let img1 = image::open(filename1).unwrap();
-    return compare(img0, img1);
+pub fn compare_files(filename0: &str, filename1: &str) -> Result<f64, Box<Error>>{
+    let img0 = image::open(filename0)?;
+    let img1 = image::open(filename1)?;
+    return Ok(compare(img0, img1)?);
 }
 
+// Unit tests
 #[cfg(test)]
 mod tests {
 	use super::compare_files;
 
 	#[test]
 	fn compare_files_test() {
-		assert!(compare_files("example-imgs/blank0.png", 
-			"example-imgs/tri0.png") > 0.0, "Images are not the same.");
-		assert!(compare_files("example-imgs/tri0.png", 
-			"example-imgs/tri1.png") == 0.0, "Images are the same.");
+		assert!(compare_files("examples/blank0.png", 
+			"examples/tri0.png").unwrap() > 0.0, "Images are not the same.");
+		assert!(compare_files("examples/tri0.png", 
+			"examples/tri1.png").unwrap() == 0.0, "Images are the same.");
+	}
+
+	#[test]
+	fn execute_job_test() {
+		let job0 = super::CompJob::new("examples/blank0.png", "examples/blank1.png");
+		let job1 = super::CompJob::new("examples/blank0.png", "examples/tri0.png");
+		assert!(execute_job(job0).unwrap() == 0.0, "Images are the same.");
+		assert!(execute_job(job1).unwrap() > 0.0, "Images are not the same.");
 	}
 
 }
