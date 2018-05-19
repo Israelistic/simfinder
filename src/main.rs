@@ -1,10 +1,34 @@
+extern crate clap;
+
 mod img_comparer;
 mod io;
 
-fn main() {
+use clap::{Arg, App};
 
-	let input_filename = "examples/example.csv";
-	let output_filename = "test.csv";
+fn main() {
+	let matches = App::new("simvar")
+		.version("1.0")
+		.author("Frank V. <fvumbaca@outlook.com>")
+		.about("Compares similarity of images.")
+		.arg(Arg::with_name("IMG_PATH")
+			.short("i")
+			.long("imgs")
+			.value_name("IMG_PATH")
+			.help("Root folder for images referenced in input file.")
+			.takes_value(true))
+		.arg(Arg::with_name("INPUT_CSV")
+			.help("Filename of the input csv listing comparisons to preform.")
+			.required(true)
+			.index(1))
+		.arg(Arg::with_name("OUTPUT_CSV")
+			.help("Filename for the results.")
+			.required(true)
+			.index(2))
+		.get_matches();
+
+	let input_filename = matches.value_of("INPUT_CSV").unwrap(); // Is required so safe for unwraping
+	let output_filename = matches.value_of("OUTPUT_CSV").unwrap(); // Also required
+	let img_path = matches.value_of("IMG_PATH").unwrap_or("./");
 
 
     match io::load(input_filename) {
