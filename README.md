@@ -1,6 +1,9 @@
-# Simfinder [![Build Status](https://travis-ci.org/fvumbaca/simfinder.svg?branch=master)](https://travis-ci.org/fvumbaca/simfinder)
+# Simfinder 
 
-An batch image similarity tool.
+<small>Mac and Linux:</small> [![Build Status](https://travis-ci.org/fvumbaca/simfinder.svg?branch=master)](https://travis-ci.org/fvumbaca/simfinder)&nbsp; &nbsp; &nbsp; <small>Windows:</small> [![Build status](https://ci.appveyor.com/api/projects/status/8l8kcg8keuyhqdhg/branch/master?svg=true)](https://ci.appveyor.com/project/fvumbaca/simfinder/branch/master)
+
+
+An batch image similarity tool. Built to be small and fast, Simfinder rapidly compares images supplied in a csv file.
 
 ## Usage
 
