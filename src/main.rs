@@ -32,7 +32,7 @@ fn main() {
 
 
     match io::load(input_filename, img_dir) {
-    	Ok(jobs) => {
+    	Ok(jobs) => { // No errors when loading the file
 
     		// Make sure we can write to the output, and might as well write the headers too
 		    let mut f = std::fs::File::create(output_filename).unwrap();
@@ -44,21 +44,24 @@ fn main() {
 		    // Iterate over the jobs and run each.
     		for j in jobs {
     			match img_comparer::execute_job(&j) {
-    				Ok(result) => {
+
+    				Ok(result) => { // The Job completed successfully
     					let (similarity, elapsed) = result;
     					let ok = io::write_results(&mut f, j.get_filename0(), j.get_filename1(), similarity, elapsed);
     					if ok.is_err() {
     						println!("There was a problem writing a result to {}", output_filename);
     					}
     				},
-    				Err(_) => {
+
+    				Err(_) => { // The Job resulted in an error
     					println!("{} could not be completed because one/both of the files do not exist.", j);
     				}
     			}
     		}
 
     	},
-    	Err(_) => {
+
+    	Err(_) => { // An error occurred when loading the input file
     		println!("Could not open file {}", input_filename);
     	}
     }

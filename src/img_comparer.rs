@@ -9,7 +9,7 @@ use std::fmt;
 use std::time::{SystemTime};
 use std::path::PathBuf;
 
-// Information to start a comparison job
+/// Comparison Job descriptor
 pub struct CompJob {
 	filename0: String,
 	filename1: String,
@@ -18,6 +18,7 @@ pub struct CompJob {
 
 // Constructor and getters for job structure
 impl CompJob {
+	/// A constructor for the CompJob Structure
 	pub fn new(filename0: &str, filename1: &str, img_path: &str) -> CompJob {
 		CompJob{
 			filename0: String::from(filename0),
@@ -25,17 +26,21 @@ impl CompJob {
 			img_path: PathBuf::from(img_path)}
 	}
 
+	/// Getter for first filename
 	pub fn get_filename0(&self) -> &str {
 		self.filename0.trim()
 	}
 
+	/// Getter for second filename
 	pub fn get_filename1(&self) -> &str {
 		self.filename1.trim()
 	}
 
 }
 
+// Implements how comp jobs are printed to the screen (in a non-debug way).
 impl fmt::Display for CompJob {
+	/// Prints the Job as a string to a formatter
 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f,"Job for {} and {}", self.filename0.trim(), self.filename1.trim())
     }
@@ -59,12 +64,13 @@ pub fn execute_job(job: &CompJob) -> Result<(f64, u32), Box<Error>> {
 
 
 // Defining a custom comparison error type
-#[derive(Debug)]
+#[derive(Debug)] // Debug trait is required but not used, so lets let the compiler implement it
 pub struct CompError {
 }
 
-// Implementing printing to screen behavior for error
+// Implementing printing to screen behavior for error (needed Trait for error Trait)
 impl fmt::Display for CompError {
+	/// Writes the Error as a string to a formatter.
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f,"{}",self.description())
     }
@@ -72,31 +78,43 @@ impl fmt::Display for CompError {
 
 // Implementing generic error behavior
 impl Error for CompError {
+	/// Getter for the description of the error
 	fn description(&self) -> &str {
         "An error occurred when comparing image files"
     }
 }
 
+
 // Todo: fix comparing images of different sizes
+/// Compares two images. Does a avg pixel difference.
 pub fn compare(img0: DynamicImage, img1: DynamicImage) -> Result<f64, CompError> {
 	let (img0_width, img0_height) = img0.dimensions();
 	let (img1_width, img1_height) = img1.dimensions();
 
 	let mut accumulated_diff: f64 = 0.0;
 
-	for y in 0..max(img0_height, img1_height) {
-		for x in 0..max(img0_width, img1_width) {
+	let width = min(img0_width, img1_width);
+	let height = min(img0_height, img1_height);
+
+
+	for y in 0..height {
+		for x in 0..width {
 			let px0 = img0.get_pixel(x, y).to_rgb().data;
 			let px1 = img1.get_pixel(x, y).to_rgb().data;
 			let mut pixel_diff : u32 = 0;
 			for i in 0..px0.len() {
 				pixel_diff += (max(px0[i], px1[i]) - min(px0[i], px1[i])) as u32;
 			}
-			accumulated_diff +=  pixel_diff as f64 * pixel_diff as f64;
+			accumulated_diff +=  pixel_diff as f64;
 		}
 	}
 
-	return Ok(accumulated_diff.sqrt());
+	let max_bounds_pixels = max(img0_width, img1_width) * max(img0_height, img1_height);
+	let compared_pixels = width * height;
+	let not_compared_pixels = max_bounds_pixels - compared_pixels;
+	accumulated_diff += not_compared_pixels as f64 * 255.0;
+
+	return Ok(accumulated_diff / max_bounds_pixels as f64);
 }
 
 // TODO: handle errors properly
@@ -126,6 +144,17 @@ mod tests {
 			"examples/tri0.png").unwrap() > 0.0, "Images are not the same.");
 		assert!(compare_files("examples/tri0.png", 
 			"examples/tri1.png").unwrap() == 0.0, "Images are the same.");
+
+		let very_different = compare_files("examples/blank0.png", "examples/red0.png").unwrap();
+		let little_different = compare_files("examples/blank0.png", "examples/tri0.png").unwrap();
+		assert!(very_different > little_different, "Comparison values should somewhat make sense.");
+
+		assert!(compare_files("examples/blank0.png", 
+			"examples/big.png").is_ok(), "A strictly small and large image should be comparable.");
+
+		assert!(compare_files("examples/wide.png", 
+			"examples/tall.png").is_ok(), "Multiple overlapping image sizes should be comparable.");
+
 	}
 
 	#[test]
