@@ -44,7 +44,22 @@ pub fn write_results(mut f: &File, filename0: &str, filename1: &str, similarity:
 mod tests {
 	#[test]
 	fn load_test() {
-		let result = super::load("examples/example.csv", "./").unwrap();
+		// This test also contains files that do not exist to also test for
+		// application robustness
+		let result = super::load("examples/example.csv", "./");
+		assert!(result.is_ok(), "The file should be loaded properly.");
+		let result = result.unwrap();
 		assert_eq!(result.len(), 3, "Three rows should be loaded.");
+
+		let result = super::load("examples/empty.csv", "./");
+		assert!(result.is_ok(), "The empty file should be loaded properly.");
+		let result = result.unwrap();
+		assert_eq!(result.len(), 0, "No rows rows should be loaded for an empty file.");
+
+		// Just to make sure these files do not raise an error: the data will be wrong tho
+		let result = super::load("examples/one-too-many.csv", "./");
+		assert!(result.is_ok(), "The badly formated file should be loaded properly");
+		let result = super::load("examples/one-too-few.csv", "./");
+		assert!(result.is_ok(), "The badly formated file should be loaded properly");
 	}
 }
