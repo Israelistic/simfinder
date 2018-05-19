@@ -53,7 +53,7 @@ $ cargo uninstall simfinder
 
 ## Comparison Algorithm
 
-Suggested for this project was to use either [Image Magick]() or [Graphics Magick](). There are two main reasons I did not use them:
+Suggested for this project was to use either [Image Magick](https://en.wikipedia.org/wiki/ImageMagick) or [Graphics Magick](https://en.wikipedia.org/wiki/GraphicsMagick). There are two main reasons I did not use them:
 
 First, it is a pain to integrate into the code. Dealing with compiling source files and managing bindings is not fun - even if a crate can do it for you. It still requires you to install the whole external project, then use a tool to manage the source files. This install is not insignificant and took time and space to download, build, then build into the project - and end users would need to do the same.
 
