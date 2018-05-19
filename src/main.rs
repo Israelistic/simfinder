@@ -10,10 +10,10 @@ fn main() {
 		.version("1.0")
 		.author("Frank V. <fvumbaca@outlook.com>")
 		.about("Compares similarity of images.")
-		.arg(Arg::with_name("IMG_PATH")
+		.arg(Arg::with_name("IMG_DIR")
 			.short("i")
 			.long("imgs")
-			.value_name("IMG_PATH")
+			.value_name("IMG_DIR")
 			.help("Root folder for images referenced in input file.")
 			.takes_value(true))
 		.arg(Arg::with_name("INPUT_CSV")
@@ -28,10 +28,10 @@ fn main() {
 
 	let input_filename = matches.value_of("INPUT_CSV").unwrap(); // Is required so safe for unwraping
 	let output_filename = matches.value_of("OUTPUT_CSV").unwrap(); // Also required
-	let img_path = matches.value_of("IMG_PATH").unwrap_or("./");
+	let img_dir = matches.value_of("IMG_DIR").unwrap_or("./");
 
 
-    match io::load(input_filename) {
+    match io::load(input_filename, img_dir) {
     	Ok(jobs) => {
 
     		// Make sure we can write to the output, and might as well write the headers too

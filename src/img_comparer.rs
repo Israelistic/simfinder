@@ -7,17 +7,22 @@ use std::boxed::Box;
 use self::image::{DynamicImage, GenericImage, Pixel};
 use std::fmt;
 use std::time::{SystemTime};
+use std::path::PathBuf;
 
 // Information to start a comparison job
 pub struct CompJob {
 	filename0: String,
 	filename1: String,
+	img_path: PathBuf,
 }
 
 // Constructor and getters for job structure
 impl CompJob {
-	pub fn new(filename0: &str, filename1: &str) -> CompJob {
-		return CompJob{filename0: String::from(filename0), filename1: String::from(filename1)};
+	pub fn new(filename0: &str, filename1: &str, img_path: &str) -> CompJob {
+		CompJob{
+			filename0: String::from(filename0),
+			filename1: String::from(filename1),
+			img_path: PathBuf::from(img_path)}
 	}
 
 	pub fn get_filename0(&self) -> &str {
@@ -39,7 +44,16 @@ impl fmt::Display for CompJob {
 // Wrapper to execute a comparison via a job
 pub fn execute_job(job: &CompJob) -> Result<(f64, u32), Box<Error>> {
 	let now = SystemTime::now();
-	let result = compare_files(job.filename0.trim(), job.filename1.trim())?;
+
+	let path0 = &job.img_path.join(job.get_filename0());
+	let path1 = &job.img_path.join(job.get_filename1());
+
+	// Create shadow variables.
+	// Necessary since the to_str function requires the temp variables to live longer
+	let path0 = path0.to_str().unwrap_or(job.get_filename0());
+	let path1 = path1.to_str().unwrap_or(job.get_filename1());
+
+	let result = compare_files(path0, path1)?;
 	Ok((result, util::nanos_to_millis(now.elapsed()?.subsec_nanos())))
 }
 
@@ -116,8 +130,8 @@ mod tests {
 
 	#[test]
 	fn execute_job_test() {
-		let job0 = super::CompJob::new("examples/blank0.png", "examples/blank1.png");
-		let job1 = super::CompJob::new("examples/blank0.png", "examples/tri0.png");
+		let job0 = super::CompJob::new("examples/blank0.png", "examples/blank1.png", "./");
+		let job1 = super::CompJob::new("examples/blank0.png", "examples/tri0.png", "./");
 		let (result0, _) = super::execute_job(&job0).unwrap();
 		let (result1, _) = super::execute_job(&job1).unwrap();
 		assert!(result0 == 0.0, "Images are the same.");
