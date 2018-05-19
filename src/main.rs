@@ -84,7 +84,7 @@ fn main() {
     			});
     		}
 
-    		for result in rx.iter().take(num_jobs) { // will wait for all the jobs to complete
+    		for result in rx.iter().take(num_jobs) { // will wait for all the jobs to complete, but handle as soon as a result is received
     			let (result, j) = result;
     			match result {
     				Some((similarity, elapsed)) => {

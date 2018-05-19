@@ -7,19 +7,19 @@ An batch image similarity tool.
 Create a csv that looks like this:
 
 | image1 | image2 |
-|--------|--------|
+|:------:|:------:|
 | img1.png|img2.png|
 
 
 Then pass the file to the tool with an output file:
 ```bash
-simfinder input.csv output.csv
+$ simfinder input.csv output.csv
 ```
 
 And the output file will look something like:
 
-| image1 | image2 | similarity | elapsed |
-|--------|--------|------------|---------|
+| image1 | image2 | similar | elapsed |
+|:------:|:------:|:-------:|:-------:|
 |img1.png|img2.png|0.56|255|
 
 > Similarity is judged by 0.00 being exactly the same and > 0.00 is different.
@@ -39,6 +39,9 @@ $ cargo install
 ```
 to build and install a release version of simfinder.
 
+> **NOTE:** If you do not want to install the binaries, you could `cargo build` from the project root,
+then find the binary under the generated `targets` directory, or simply run a debug copy of the application by replacing `simfinder` with `cargo run --` in the usage guide when in the root directory of the project.
+
 ## Uninstall
 
 When your done with all this tool has to offer, just run:
@@ -50,6 +53,7 @@ $ cargo uninstall simfinder
 - **[Image](https://github.com/PistonDevelopers/image)** - The basic image library developed for and used in Piston
 - **[Csv](https://github.com/BurntSushi/rust-csv)** - A csv parsing library
 - **[Clap](https://github.com/kbknapp/clap-rs)** - Api for building a beautiful cli
+- **[Rayon](https://github.com/rayon-rs/rayon)** - Data parallelism Library
 
 ## Comparison Algorithm
 
